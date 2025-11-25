@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=1920, initial-scale=1" />
   <title>Workshop Performance Dashboard</title>
 
-  <!-- Main CSS -->
+  <!-- CSS -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- PapaParse for CSV parsing -->
+  <!-- CSV Parser -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
   <div class="wrapper" id="dashboard">
+
+    <!-- HEADER -->
     <div class="header">
       <div class="brand">
         <div class="logo-box">W</div>
         <div>
           <div class="title">Workshop Performance Board</div>
-          <div class="subtitle">Auto-refresh · Vertical scrolling · 1920×1080 display</div>
+          <div class="subtitle">Auto-refresh • 1920×1080 • Live Google Sheet</div>
         </div>
       </div>
 
@@ -36,8 +38,10 @@
       </div>
     </div>
 
+    <!-- BODY -->
     <div class="board">
-      <!-- LEFT: Main list -->
+
+      <!-- LEFT COLUMN -->
       <div class="column main-column">
         <div class="col-header">Leaderboard</div>
 
@@ -53,7 +57,7 @@
         </div>
       </div>
 
-      <!-- RIGHT: Top Performers -->
+      <!-- RIGHT COLUMN -->
       <div class="column side-column">
         <div class="col-header">Top Performers</div>
 
@@ -66,16 +70,16 @@
           <div id="lastUpdated">—</div>
         </div>
       </div>
+
     </div>
   </div>
 
-  <!-- Top performer beep -->
+  <!-- ALERT SOUND -->
   <audio id="topBeep">
-    <source src="beep.mp3" type="audio/mpeg">
+    <source src="beep.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- JS -->
+  <!-- JAVASCRIPT -->
   <script src="script.js"></script>
-
 </body>
 </html>
