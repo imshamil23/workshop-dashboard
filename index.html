@@ -1,27 +1,34 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=1920, initial-scale=1" />
-  <title>Workshop Performance Dashboard</title>
+  <title>A.M. Motors – Workshop Performance Dashboard</title>
 
   <!-- CSS -->
   <link rel="stylesheet" href="styles.css" />
 
-  <!-- CSV Parser -->
+  <!-- PapaParse for CSV Parsing -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
 <body>
 
-  <div class="wrapper" id="dashboard">
+  <!-- Background Watermark -->
+  <div class="watermark"></div>
 
-    <!-- HEADER -->
+  <!-- Main Wrapper -->
+  <div class="wrapper">
+
+    <!-- HEADER SECTION -->
     <div class="header">
       <div class="brand">
-        <div class="logo-box">W</div>
+        <div class="logo-box">
+          <img src="logo.png" class="company-logo" alt="A.M. Motors Logo"/>
+        </div>
+
         <div>
           <div class="title">Workshop Performance Board</div>
-          <div class="subtitle">Auto-refresh • 1920×1080 • Live Google Sheet</div>
+          <div class="subtitle">Live Google Sheet • Auto-refresh • Scrolling Leaderboard</div>
         </div>
       </div>
 
@@ -38,7 +45,7 @@
       </div>
     </div>
 
-    <!-- BODY -->
+    <!-- BODY SECTION -->
     <div class="board">
 
       <!-- LEFT COLUMN -->
@@ -52,8 +59,8 @@
         </div>
 
         <div class="footer">
-          <div id="leftFooter">Loading...</div>
-          <div>Refresh: <strong>20s</strong></div>
+          <span id="leftFooter">Loading…</span>
+          <span>Refresh: <strong>20s</strong></span>
         </div>
       </div>
 
@@ -66,20 +73,20 @@
         </div>
 
         <div class="footer">
-          <div id="rightFooter">Waiting...</div>
-          <div id="lastUpdated">—</div>
+          <span id="rightFooter">Waiting…</span>
+          <span id="lastUpdated">—</span>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ALERT SOUND -->
+  <!-- Sound Alert for Rank #1 -->
   <audio id="topBeep">
     <source src="beep.mp3" type="audio/mpeg" />
   </audio>
 
-  <!-- JAVASCRIPT -->
+  <!-- JavaScript Logic -->
   <script src="script.js"></script>
 </body>
 </html>
