@@ -207,3 +207,34 @@ function setupScroll() {
  ********************************************************/
 refreshData();
 setInterval(refreshData, REFRESH_INTERVAL);
+
+/********************************************************
+ * AUTO TAB ROTATION (NO CLICK NEEDED)
+ ********************************************************/
+let autoIndex = 0;
+const autoTabs = [
+  { tab: "today", sheet: "advisor" },
+  { tab: "today", sheet: "technician" },
+  { tab: "till", sheet: "advisor" },
+  { tab: "till", sheet: "technician" },
+];
+
+function autoRotateTabs() {
+  autoIndex = (autoIndex + 1) % autoTabs.length;
+
+  activeTab = autoTabs[autoIndex].tab;
+  activeSheet = autoTabs[autoIndex].sheet;
+
+  // Update visual tab UI
+  tabs.forEach(t => t.classList.remove("active"));
+  subtabs.forEach(s => s.classList.remove("active"));
+
+  document.querySelector(`.tab[data-tab="${activeTab}"]`).classList.add("active");
+  document.querySelector(`.subtab[data-sheet="${activeSheet}"]`).classList.add("active");
+
+  render();
+}
+
+setInterval(autoRotateTabs, 20000); // change tab every 20 sec
+
+
