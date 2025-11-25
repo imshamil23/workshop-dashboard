@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=1920, initial-scale=1" />
+  <title>Workshop Performance Dashboard</title>
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="styles.css" />
+
+  <!-- PapaParse for CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+
+  <div class="wrapper" id="dashboard">
+    <div class="header">
+      <div class="brand">
+        <div class="logo-box">W</div>
+        <div>
+          <div class="title">Workshop Performance Board</div>
+          <div class="subtitle">Auto-refresh · Vertical scrolling · 1920×1080 display</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="tabs">
+          <div class="tab active" data-tab="today">Today</div>
+          <div class="tab" data-tab="till">Till Date</div>
+        </div>
+
+        <div class="subtabs">
+          <div class="subtab active" data-sheet="advisor">Advisor Level</div>
+          <div class="subtab" data-sheet="technician">Technician Level</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="board">
+      <!-- LEFT: Main list -->
+      <div class="column main-column">
+        <div class="col-header">Leaderboard</div>
+
+        <div class="scroll-viewport">
+          <div class="list-wrap" id="listWrapLeft">
+            <div class="list" id="listLeft"></div>
+          </div>
+        </div>
+
+        <div class="footer">
+          <div id="leftFooter">Loading...</div>
+          <div>Refresh: <strong>20s</strong></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Top Performers -->
+      <div class="column side-column">
+        <div class="col-header">Top Performers</div>
+
+        <div class="scroll-viewport side-viewport">
+          <div id="topList"></div>
+        </div>
+
+        <div class="footer">
+          <div id="rightFooter">Waiting...</div>
+          <div id="lastUpdated">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top performer beep -->
+  <audio id="topBeep">
+    <source src="beep.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- JS -->
+  <script src="script.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+:root {
+  --header-red: #BC0022;
+  --bg: #0b0b0b;
+  --light-row: #f7f7f7;
+  --glow: rgba(188,0,34,0.35);
+  --text-dark: #111;
+  --text-muted: #6b7280;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  font-family: Inter, sans-serif;
+  color: var(--text-dark);
+}
+
+/* Wrapper */
+.wrapper {
+  width: 1200px;
+  height: 680px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.logo-box {
+  width: 56px;
+  height: 56px;
+  background: #222;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--header-red);
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #777;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+}
+
+/* Tabs */
+.tabs, .subtabs {
+  display: flex;
+  gap: 8px;
+}
+
+.tab, .subtab {
+  padding: 6px 12px;
+  background: #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.tab.active, .subtab.active {
+  background: var(--header-red);
+  color: white;
+}
+
+.board {
+  display: flex;
+  gap: 16px;
+  height: calc(100% - 70px);
+}
+
+.column {
+  background: #fafafa;
+  border-radius: 10px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-column {
+  flex: 1.2;
+}
+
+.side-column {
+  width: 360px;
+}
+
+.col-header {
+  background: var(--header-red);
+  color: white;
+  padding: 10px 16px;
+  font-weight: 700;
+}
+
+/* Scroll Area */
+.scroll-viewport {
+  overflow: hidden;
+  flex: 1;
+}
+
+.list-wrap {
+  position: relative;
+}
+
+.list {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Employee Card */
+.card {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  padding: 10px;
+  display: flex;
+  gap: 12px;
+  position: relative;
+  box-shadow: 0 3px 14px rgba(0,0,0,0.1);
+}
+
+.card.glow {
+  box-shadow: 0 0 20px var(--glow);
+}
+
+.photo {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: #e6e6e6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.meta {
+  color: var(--text-muted);
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.metric {
+  background: #eee;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Rank Badges */
+.badge {
+  position: absolute;
+  left: -12px;
+  top: -12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+}
+
+.gold {
+  background: gold;
+}
+.silver {
+  background: silver;
+}
+.bronze {
+  background: #cd7f32;
+}
+
+/* Footer */
+.footer {
+  padding: 6px 12px;
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  justify-content: space-between;
+}
+.footer a {
+  color: var(--header-red);
+  text-decoration: none;
+}
