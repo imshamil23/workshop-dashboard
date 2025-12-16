@@ -1,240 +1,262 @@
-/********************************************************
- * GOOGLE SHEET CSV URLS
- ********************************************************/
-const ADVISOR_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/148f8oGqJL5u3ujLdwRzm05x7TKpPoqQikyltXa1zTCw/export?format=csv&gid=244746706";
-
-const TECHNICIAN_CSV_URL =
-  "https://docs.google.com/spreadsheets/d/148f8oGqJL5u3ujLdwRzm05x7TKpPoqQikyltXa1zTCw/export?format=csv&gid=136202424";
-
-const REFRESH_INTERVAL = 20000;
-
-/********************************************************
- * DOM ELEMENTS
- ********************************************************/
-const tabs = document.querySelectorAll(".tab");
-const subtabs = document.querySelectorAll(".subtab");
-const listLeft = document.getElementById("listLeft");
-const listWrapLeft = document.getElementById("listWrapLeft");
-const topList = document.getElementById("topList");
-const leftFooter = document.getElementById("leftFooter");
-const rightFooter = document.getElementById("rightFooter");
-const lastUpdatedEl = document.getElementById("lastUpdated");
-const beep = document.getElementById("topBeep");
-
-/********************************************************
- * STATE
- ********************************************************/
-let activeTab = "today";
-let activeSheet = "advisor";
-let lastTop = null;
-let scrollAnimation;
-
-/********************************************************
- * EVENTS
- ********************************************************/
-tabs.forEach(tab =>
-  tab.addEventListener("click", () => {
-    tabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    activeTab = tab.dataset.tab;
-    render();
-  })
-);
-
-subtabs.forEach(sub =>
-  sub.addEventListener("click", () => {
-    subtabs.forEach(s => s.classList.remove("active"));
-    sub.classList.add("active");
-    activeSheet = sub.dataset.sheet;
-    render();
-  })
-);
-
-/********************************************************
- * FETCH CSV
- ********************************************************/
-function fetchCSV(url) {
-  return new Promise(resolve => {
-    Papa.parse(url, {
-      download: true,
-      header: true,
-      complete: result => resolve(result.data),
+/**
+ * Workshop Dashboard Logic
+ * Handles Google Sheets fetching, scoring algorithms, and auto-scrolling UI.
+ */
+/* --- CONFIG --- */
+const CONFIG = {
+    urls: {
+        advisor: "https://docs.google.com/spreadsheets/d/148f8oGqJL5u3ujLdwRzm05x7TKpPoqQikyltXa1zTCw/export?format=csv&gid=244746706",
+        technician: "https://docs.google.com/spreadsheets/d/148f8oGqJL5u3ujLdwRzm05x7TKpPoqQikyltXa1zTCw/export?format=csv&gid=136202424"
+    },
+    refreshInterval: 20000,   // Data fetch interval (ms)
+    scrollSpeed: 1,           // Pixels per frame (approx 60fps)
+    tabRotationInterval: 20000 // Tab switch interval (ms)
+};
+/* --- STATE --- */
+const state = {
+    data: { advisor: [], technician: [] },
+    activeTab: 'today',      // 'today' or 'till'
+    activeSheet: 'advisor',  // 'advisor' or 'technician'
+    lastTopPerformer: null,
+    isScrolling: false
+};
+/* --- DOM ELEMENTS --- */
+const elements = {
+    mainLeaderboard: document.getElementById('mainLeaderboard'),
+    topList: document.getElementById('topPerformersList'),
+    tabs: document.querySelectorAll('[data-tab]'),
+    subtabs: document.querySelectorAll('[data-sheet]'),
+    updateTimer: document.getElementById('updateTimer'),
+    totalCount: document.getElementById('totalCount'),
+    lastSyncTime: document.getElementById('lastSyncTime'),
+    notification: document.getElementById('notificationSound')
+};
+/* --- INITIALIZATION --- */
+async function init() {
+    setupEventListeners();
+    await fetchData();
+    startAutoLoop();
+    startRefreshTimer();
+}
+function setupEventListeners() {
+    // Tab Clicks
+    elements.tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setActiveTab(btn.dataset.tab);
+            resetAutoRotation(); // User interaction pauses auto-rotation momentarily if we wanted
+        });
     });
-  });
+    elements.subtabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            setActiveSheet(btn.dataset.sheet);
+        });
+    });
 }
-
-/********************************************************
- * REFRESH DATA
- ********************************************************/
-async function refreshData() {
-  const [advisor, technician] = await Promise.all([
-    fetchCSV(ADVISOR_CSV_URL),
-    fetchCSV(TECHNICIAN_CSV_URL)
-  ]);
-
-  window._data = { advisor, technician };
-
-  leftFooter.textContent = "Updated";
-  rightFooter.textContent = `Advisor: ${advisor.length} | Technician: ${technician.length}`;
-  lastUpdatedEl.textContent = "Updated at " + new Date().toLocaleTimeString();
-
-  render();
+/* --- DATA FETCHING --- */
+async function fetchData() {
+    elements.lastSyncTime.textContent = "Syncing...";
+    try {
+        const [advisorData, techData] = await Promise.all([
+            fetchCSV(CONFIG.urls.advisor),
+            fetchCSV(CONFIG.urls.technician)
+        ]);
+        state.data.advisor = advisorData;
+        state.data.technician = techData;
+        elements.lastSyncTime.textContent = `Synced: ${new Date().toLocaleTimeString()}`;
+        render();
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        elements.lastSyncTime.textContent = "Sync Failed";
+    }
 }
-
-/********************************************************
- * SCORE CALCULATION
- ********************************************************/
-function score(r, mode) {
-  if (mode === "today") {
-    return (
-      (parseFloat(r["Today Load"]) || 0) * 2 +
-      (parseFloat(r["Today Labour"]) || 0) * 3 +
-      (parseFloat(r["Today VAS"]) || 0)
-    );
-  }
-
-  return (
-    (parseFloat(r["Total Load"]) || 0) * 2 +
-    (parseFloat(r["Month Labour"]) || 0) * 3 +
-    (parseFloat(r["Total VAS"]) || 0)
-  );
+function fetchCSV(url) {
+    return new Promise((resolve, reject) => {
+        Papa.parse(url, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: (results) => resolve(results.data),
+            error: (err) => reject(err)
+        });
+    });
 }
-
-/********************************************************
- * RENDER UI
- ********************************************************/
+function startRefreshTimer() {
+    setInterval(fetchData, CONFIG.refreshInterval);
+    // Visual countdown
+    let left = CONFIG.refreshInterval / 1000;
+    setInterval(() => {
+        left--;
+        if (left < 0) left = CONFIG.refreshInterval / 1000;
+        elements.updateTimer.textContent = `${left}s`;
+    }, 1000);
+}
+/* --- STATE MANAGEMENT --- */
+function setActiveTab(tab) {
+    state.activeTab = tab;
+    // Update UI Classes
+    elements.tabs.forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    render();
+}
+function setActiveSheet(sheet) {
+    state.activeSheet = sheet;
+    // Update UI Classes
+    elements.subtabs.forEach(b => b.classList.toggle('active', b.dataset.sheet === sheet));
+    render();
+}
+/* --- SCORING ENGINE --- */
+function calculateScore(row, mode) {
+    // Helper to safely parse numbers
+    const getVal = (key) => parseFloat(row[key]) || 0;
+    let score = 0;
+    /* NOTE: Adjust these keys if your CSV headers differ exactly */
+    if (mode === 'today') {
+        const load = getVal('Today Load');
+        const labour = getVal('Today Labour');
+        const vas = getVal('Today VAS');
+        score = (load * 2) + (labour * 3) + vas;
+    } else {
+        const load = getVal('Total Load');
+        const labour = getVal('Month Labour');
+        const vas = getVal('Total VAS');
+        score = (load * 2) + (labour * 3) + vas;
+    }
+    return Math.round(score);
+}
+/* --- RENDERING --- */
 function render() {
-  if (!window._data) return;
-
-  let rows = window._data[activeSheet];
-  const mode = activeTab;
-
-  rows = rows
-    .map(r => ({ ...r, _score: score(r, mode) }))
-    .sort((a, b) => b._score - a._score);
-
-  listLeft.innerHTML = rows.map((r, i) => card(r, i + 1)).join("");
-  topList.innerHTML = rows.slice(0, 5).map((r, i) => topCard(r, i + 1)).join("");
-
-  if (rows[0] && rows[0].Name !== lastTop) {
-    beep.play().catch(() => {});
-    lastTop = rows[0].Name;
-  }
-
-  setupScroll();
+    const rawData = state.data[state.activeSheet];
+    if (!rawData || rawData.length === 0) return;
+    // Process Data
+    const processed = rawData
+        .map(row => ({
+            ...row,
+            _score: calculateScore(row, state.activeTab),
+            _initial: (row.Name && row.Name[0]) ? row.Name[0] : '?'
+        }))
+        .sort((a, b) => b._score - a._score); // Descending
+    // Check for new #1
+    if (processed[0] && processed[0].Name !== state.lastTopPerformer) {
+        state.lastTopPerformer = processed[0].Name;
+        playNotification();
+    }
+    // Update Counts
+    elements.totalCount.textContent = processed.length;
+    // Render Lists
+    renderLeaderboard(processed);
+    renderTopPerformers(processed.slice(0, 5));
+    // Reset Scroll
+    setupAutoScroll();
 }
-
-/********************************************************
- * CARD HTML
- ********************************************************/
-function card(r, rank) {
-  return `
-    <div class="card ${rank === 1 ? "glow" : ""}">
-      ${rankBadge(rank)}
-      <div class="photo">${r.Name?.[0] || "?"}</div>
-      <div>
-        <div class="name">${r.Name}</div>
-        <div class="meta">
-          <span class="metric">Load: ${r["Today Load"]}</span>
-          <span class="metric">Labour: ${r["Today Labour"]}</span>
-          <span class="metric">VAS: ${r["Today VAS"]}</span>
-          <span class="metric">Score: ${Math.round(r._score)}</span>
-        </div>
-      </div>
-    </div>`;
+function renderLeaderboard(data) {
+    const html = data.map((item, index) => {
+        const rank = index + 1;
+        let label1, val1, label2, val2, label3, val3;
+        if (state.activeTab === 'today') {
+            label1 = 'Load'; val1 = item['Today Load'];
+            label2 = 'Labour'; val2 = item['Today Labour'];
+            label3 = 'VAS'; val3 = item['Today VAS'];
+        } else {
+            label1 = 'Total'; val1 = item['Total Load'];
+            label2 = 'Mnth Lab'; val2 = item['Month Labour'];
+            label3 = 'Tot VAS'; val3 = item['Total VAS'];
+        }
+        return `
+            <div class="card animate-in" data-rank="${rank}" style="animation-delay: ${index * 0.05}s">
+                <div class="rank-badge">${rank}</div>
+                <div class="avatar">${item._initial}</div>
+                <div class="card-info">
+                    <div class="name">${item.Name}</div>
+                    <div class="metrics">
+                        <span class="metric-pill">${label1}: ${val1}</span>
+                        <span class="metric-pill">${label2}: ${val2}</span>
+                        <span class="metric-pill">${label3}: ${val3}</span>
+                    </div>
+                </div>
+                <div class="score-box">
+                    <span class="score-label">Score</span>
+                    <span class="score-value">${item._score}</span>
+                </div>
+            </div>
+        `;
+    }).join('');
+    elements.mainLeaderboard.innerHTML = html;
 }
-
-/********************************************************
- * TOP CARD HTML
- ********************************************************/
-function topCard(r, rank) {
-  return `
-    <div class="card" style="padding:8px;">
-      <div style="font-weight:bold; width:34px">${rank}</div>
-      <div class="photo">${r.Name?.[0] || "?"}</div>
-      <div>
-        <div class="name">${r.Name}</div>
-        <div class="meta">Score: ${Math.round(r._score)}</div>
-      </div>
-    </div>`;
+function renderTopPerformers(data) {
+    const html = data.map((item, index) => {
+        const rank = index + 1;
+        const isGold = rank === 1 ? 'gold-border' : '';
+        return `
+            <div class="top-card ${isGold} animate-in">
+                <div class="rank">#${rank}</div>
+                <div class="avatar" style="width:40px;height:40px;font-size:14px;">${item._initial}</div>
+                <div style="flex:1">
+                    <div style="font-weight:600">${item.Name}</div>
+                    <div style="font-size:12px;color:#888">Score: ${item._score}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    elements.topList.innerHTML = html;
 }
-
-/********************************************************
- * RANK BADGES
- ********************************************************/
-function rankBadge(rank) {
-  if (rank === 1) return `<div class="badge gold">🥇</div>`;
-  if (rank === 2) return `<div class="badge silver">🥈</div>`;
-  if (rank === 3) return `<div class="badge bronze">🥉</div>`;
-  return "";
+function playNotification() {
+    elements.notification.play().catch(e => console.log("Audio play blocked", e));
 }
-
-/********************************************************
- * AUTOSCROLL
- ********************************************************/
-function setupScroll() {
-  cancelAnimationFrame(scrollAnimation);
-
-  const list = listLeft;
-  const wrap = listWrapLeft;
-
-  const oldClone = wrap.querySelector(".clone");
-  if (oldClone) oldClone.remove();
-
-  const clone = list.cloneNode(true);
-  clone.classList.add("clone");
-  wrap.appendChild(clone);
-
-  let pos = 0;
-  const speed = 30;
-
-  function loop() {
-    pos += speed / 60;
-    if (pos >= list.scrollHeight) pos = 0;
-
-    list.style.transform = `translateY(-${pos}px)`;
-    clone.style.transform = `translateY(-${pos}px)`;
-
-    scrollAnimation = requestAnimationFrame(loop);
-  }
-
-  loop();
+/* --- AUTO SCROLL ENGINE --- */
+let scrollReq;
+function setupAutoScroll() {
+    cancelAnimationFrame(scrollReq);
+    const container = elements.mainLeaderboard;
+    // We need to clone the content to make it seamless loop if content is taller than viewport
+    // However, simplest seamless scroll for lists is often to just clone the list once below
+    // Remove old clones
+    const oldClones = container.querySelectorAll('.clone-set');
+    oldClones.forEach(el => el.remove());
+    // Basic Logic: If content height > viewport, scroll. 
+    // Ideally we duplicate content inside the container
+    // NOTE: For true seamless infinite scroll, we need a wrapper logic.
+    // Simplifying: we will just scroll down then snap back or bounce.
+    // Let's implement the standard "Duplicate and loop"
+    const originalContent = Array.from(container.children);
+    if (originalContent.length < 5) return; // Don't scroll if few items
+    // Create a wrapper div to move
+    // Actually, styles.css defines .scroll-container-mask which hides overflow
+    // .scroll-content is what we move.
+    // Let's duplicate content to ensure we can scroll smoothly
+    const cloneDiv = document.createElement('div');
+    cloneDiv.className = 'clone-set';
+    cloneDiv.style.display = 'flex';
+    cloneDiv.style.flexDirection = 'column';
+    cloneDiv.style.gap = '12px';
+    cloneDiv.innerHTML = container.innerHTML; // Clone
+    container.appendChild(cloneDiv);
+    let yPos = 0;
+    function step() {
+        yPos += CONFIG.scrollSpeed;
+        // If we have scrolled past the height of the original content set
+        // (approx half the new total height), reset to 0
+        if (yPos >= (container.scrollHeight / 2)) {
+            yPos = 0;
+        }
+        container.style.transform = `translateY(-${yPos}px)`;
+        scrollReq = requestAnimationFrame(step);
+    }
+    step();
 }
-
-/********************************************************
- * AUTO START
- ********************************************************/
-refreshData();
-setInterval(refreshData, REFRESH_INTERVAL);
-
-/********************************************************
- * AUTO TAB ROTATION (NO CLICK NEEDED)
- ********************************************************/
-let autoIndex = 0;
-const autoTabs = [
-  { tab: "today", sheet: "advisor" },
-  { tab: "today", sheet: "technician" },
-  { tab: "till", sheet: "advisor" },
-  { tab: "till", sheet: "technician" },
-];
-
-function autoRotateTabs() {
-  autoIndex = (autoIndex + 1) % autoTabs.length;
-
-  activeTab = autoTabs[autoIndex].tab;
-  activeSheet = autoTabs[autoIndex].sheet;
-
-  // Update visual tab UI
-  tabs.forEach(t => t.classList.remove("active"));
-  subtabs.forEach(s => s.classList.remove("active"));
-
-  document.querySelector(`.tab[data-tab="${activeTab}"]`).classList.add("active");
-  document.querySelector(`.subtab[data-sheet="${activeSheet}"]`).classList.add("active");
-
-  render();
+/* --- AUTO TAB ROTATION --- */
+function startAutoLoop() {
+    const loopSequence = [
+        { tab: 'today', sheet: 'advisor' },
+        { tab: 'today', sheet: 'technician' },
+        { tab: 'till', sheet: 'advisor' },
+        { tab: 'till', sheet: 'technician' }
+    ];
+    let idx = 0;
+    setInterval(() => {
+        idx = (idx + 1) % loopSequence.length;
+        const next = loopSequence[idx];
+        setActiveTab(next.tab);
+        setActiveSheet(next.sheet);
+    }, CONFIG.tabRotationInterval);
 }
-
-setInterval(autoRotateTabs, 20000); // change tab every 20 sec
-
-
+// Start
+init();
