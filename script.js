@@ -29,8 +29,53 @@ const elements = {
     updateTimer: document.getElementById('updateTimer'),
     totalCount: document.getElementById('totalCount'),
     lastSyncTime: document.getElementById('lastSyncTime'),
-    notification: document.getElementById('notificationSound')
+    notification: document.getElementById('notificationSound'),
+    confettiContainer: document.body
 };
+/* --- CONFETTI --- */
+function fireConfetti() {
+    // Simple particle explosion
+    const colors = ['#FFD700', '#FF3B30', '#00ff88', '#FFF'];
+    const count = 100;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.style.position = 'fixed';
+        p.style.width = Math.random() * 8 + 4 + 'px';
+        p.style.height = Math.random() * 8 + 4 + 'px';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.left = '50%';
+        p.style.top = '50%';
+        p.style.borderRadius = '50%';
+        p.style.pointerEvents = 'none';
+        p.style.opacity = 1;
+        p.style.zIndex = 9999;
+        // Random velocity
+        const angle = Math.random() * Math.PI * 2;
+        const velocity = Math.random() * 15 + 5;
+        const vx = Math.cos(angle) * velocity;
+        const vy = Math.sin(angle) * velocity;
+        document.body.appendChild(p);
+        let x = window.innerWidth / 2;
+        let y = window.innerHeight / 2;
+        let alpha = 1;
+        // Animation loop for this particle
+        let particleVy = vy;
+        function updateParticle() {
+            x += vx;
+            y += particleVy;
+            particleVy += 0.5; // gravity
+            alpha -= 0.01;
+            p.style.transform = `translate(${x - window.innerWidth / 2}px, ${y - window.innerHeight / 2}px)`;
+            p.style.opacity = alpha;
+            if (alpha > 0) {
+                requestAnimationFrame(updateParticle);
+            } else {
+                p.remove();
+            }
+        }
+        requestAnimationFrame(updateParticle);
+    }
+}
 /* --- INITIALIZATION --- */
 async function init() {
     setupEventListeners();
@@ -54,6 +99,8 @@ function setupEventListeners() {
 }
 /* --- DATA FETCHING --- */
 async function fetchData() {
+    // Only show skeletons if we have no data yet
+    if (state.data.advisor.length === 0) renderSkeletons();
     elements.lastSyncTime.textContent = "Syncing...";
     try {
         const [advisorData, techData] = await Promise.all([
@@ -138,6 +185,7 @@ function render() {
     if (processed[0] && processed[0].Name !== state.lastTopPerformer) {
         state.lastTopPerformer = processed[0].Name;
         playNotification();
+        fireConfetti();
     }
     // Update Counts
     elements.totalCount.textContent = processed.length;
@@ -200,6 +248,12 @@ function renderTopPerformers(data) {
 }
 function playNotification() {
     elements.notification.play().catch(e => console.log("Audio play blocked", e));
+}
+/* --- SKELETONS --- */
+function renderSkeletons() {
+    const skeletonHTML = Array(8).fill('<div class="card skeleton skeleton-card"></div>').join('');
+    elements.mainLeaderboard.innerHTML = skeletonHTML;
+    elements.topList.innerHTML = Array(3).fill('<div class="top-card skeleton" style="height:60px;margin-bottom:10px"></div>').join('');
 }
 /* --- AUTO SCROLL ENGINE --- */
 let scrollReq;
