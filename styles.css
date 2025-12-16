@@ -405,6 +405,30 @@ body {
         transform: translateY(0);
     }
 }
-.animate-in {
-    animation: slideIn 0.5s var(--ease-smooth) forwards;
+/* --- SKELETON LOADING --- */
+.skeleton {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: skeleton-load 1.5s infinite;
+    border-radius: 8px;
+}
+@keyframes skeleton-load {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+.skeleton-card {
+    height: 80px;
+    width: 100%;
+    margin-bottom: 12px;
+}
+/* --- CONFETTI CONTAINER --- */
+#confetti-container {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
 }
