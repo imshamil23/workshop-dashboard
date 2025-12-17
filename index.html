@@ -4,78 +4,95 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A.M. Motors | Performance Dashboard</title>
-    <!-- Fonts -->
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <!-- CSS -->
     <link rel="stylesheet" href="styles.css">
+
     <!-- PapaParse -->
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 </head>
+
 <body>
-    <!-- Ambient Background -->
+
+    <!-- Background -->
     <div class="ambient-glow"></div>
     <div class="grid-overlay"></div>
-    <main class="section-container">
-        <!-- VIEW 1: LANDING PAGE -->
-        <section id="landingView" class="landing-container fade-in">
-            <h1 class="landing-title">Performance Dashboard</h1>
-            <div class="menu-grid">
-                <!-- Card 1 -->
-                <div class="menu-card" onclick="app.loadView('advisor', 'today')">
-                    <div class="icon-placeholder">👨‍💼</div>
-                    <h3>Malappuram Advisor Today</h3>
-                    <p>Live Daily Performance</p>
-                </div>
-                <!-- Card 2 -->
-                <div class="menu-card" onclick="app.loadView('advisor', 'total')">
-                    <div class="icon-placeholder">📊</div>
-                    <h3>Malappuram Advisor Total</h3>
-                    <p>Cumulative Monthly Data</p>
-                </div>
-                <!-- Card 3 -->
-                <div class="menu-card" onclick="app.loadView('tech', 'today')">
-                    <div class="icon-placeholder">🔧</div>
-                    <h3>Malappuram Tech Today</h3>
-                    <p>Technician Daily Output</p>
-                </div>
-                <!-- Card 4 -->
-                <div class="menu-card" onclick="app.loadView('tech', 'total')">
-                    <div class="icon-placeholder">📈</div>
-                    <h3>Malappuram Tech Total</h3>
-                    <p>Technician Monthly Overall</p>
-                </div>
-            </div>
-        </section>
-        <!-- VIEW 2: DASHBOARD DISPLAY -->
-        <section id="dashboardView" class="dashboard-view hidden">
-            <!-- Top Bar -->
-            <header class="top-bar">
-                <button class="back-btn" onclick="app.goHome()">
-                    <span>←</span> Home
-                </button>
-                <h2 class="page-title" id="pageTitle">Advisor Performance</h2>
-                <div class="clock" id="clock">12:00 PM</div>
-            </header>
-            <!-- Table Area -->
-            <div class="table-container">
-                <!-- Dynamic Header injected here -->
-                <div class="table-header" id="tableHeader">
-                    <!-- e.g. <div>Name</div> <div>Score</div> ... -->
-                </div>
-                <!-- Scrollable Content -->
-                <div class="scroll-wrapper">
-                    <div class="scroll-content" id="tableBody">
-                        <!-- Rows injected here -->
+
+    <main class="dashboard-container">
+
+        <!-- HEADER -->
+        <header class="glass-header">
+            <div class="brand-section">
+                <div class="logo-fallback">AM</div>
+                <div class="brand-info">
+                    <h1>Workshop Performance Board</h1>
+                    <div class="status-badges">
+                        <span class="status-badge"><span class="pulse"></span> Live Sync</span>
+                        <span class="status-badge">Auto Mode</span>
                     </div>
                 </div>
             </div>
-        </section>
+
+            <div class="controls-section">
+                <div class="control-group">
+                    <button class="control-btn active" data-tab="today">Today</button>
+                    <button class="control-btn" data-tab="till">Till Date</button>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn sub-btn active" data-sheet="advisor">Advisors</button>
+                    <button class="control-btn sub-btn" data-sheet="technician">Technicians</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- CONTENT -->
+        <div class="dashboard-grid">
+
+            <!-- LEADERBOARD -->
+            <section class="panel">
+                <div class="panel-header">
+                    <h2>Live Rankings</h2>
+                    <div class="refresh-timer">
+                        <span id="updateTimer">20s</span>
+                    </div>
+                </div>
+
+                <div class="scroll-container-mask">
+                    <div class="scroll-content" id="mainLeaderboard"></div>
+                </div>
+
+                <div class="panel-footer">
+                    <span>Total Active: <strong id="totalCount">0</strong></span>
+                    <span id="lastSyncTime">Syncing...</span>
+                </div>
+            </section>
+
+            <!-- TOP PERFORMERS -->
+            <section class="panel top-panel">
+                <div class="panel-header">
+                    <h2>Top Performers</h2>
+                </div>
+
+                <div class="top-list" id="topPerformersList"></div>
+
+                <div class="quote-box">
+                    "Quality means doing it right when no one is looking."
+                </div>
+            </section>
+
+        </div>
     </main>
-    <!-- Scripts -->
+
+    <audio id="notificationSound">
+        <source src="beep.mp3" type="audio/mpeg">
+    </audio>
+
+    <!-- JS -->
     <script src="script.js"></script>
 </body>
 </html>
