@@ -1,3 +1,7 @@
+
+script.js
+
+
 /**
  * Workshop Dashboard Logic
  * Handles Google Sheets fetching, scoring algorithms, and auto-scrolling UI.
