@@ -1,98 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A.M. Motors | Performance Dashboard</title>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- PapaParse -->
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <meta charset="UTF-8" />
+  <title>Workshop Performance Board</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-    <!-- Background -->
-    <div class="ambient-glow"></div>
-    <div class="grid-overlay"></div>
+<div class="header">
+  <h1>Workshop Performance Board</h1>
 
-    <main class="dashboard-container">
+  <div class="tabs">
+    <button onclick="loadSheet('MALAPPURAM ADVISOR TODAY')">Advisor Today</button>
+    <button onclick="loadSheet('MALAPPURAM ADVISOR TOTAL')">Advisor Total</button>
+    <button onclick="loadSheet('MALAPPURAM TECH TODAY')">Tech Today</button>
+    <button onclick="loadSheet('MALAPPURAM TECH TOTAL')">Tech Total</button>
+  </div>
+</div>
 
-        <!-- HEADER -->
-        <header class="glass-header">
-            <div class="brand-section">
-                <div class="logo-fallback">AM</div>
-                <div class="brand-info">
-                    <h1>Workshop Performance Board</h1>
-                    <div class="status-badges">
-                        <span class="status-badge"><span class="pulse"></span> Live Sync</span>
-                        <span class="status-badge">Auto Mode</span>
-                    </div>
-                </div>
-            </div>
+<div class="content">
+  <table id="dataTable">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+</div>
 
-            <div class="controls-section">
-                <div class="control-group">
-                    <button class="control-btn active" data-tab="today">Today</button>
-                    <button class="control-btn" data-tab="till">Till Date</button>
-                </div>
-                <div class="control-group">
-                    <button class="control-btn sub-btn active" data-sheet="advisor">Advisors</button>
-                    <button class="control-btn sub-btn" data-sheet="technician">Technicians</button>
-                </div>
-            </div>
-        </header>
-
-        <!-- CONTENT -->
-        <div class="dashboard-grid">
-
-            <!-- LEADERBOARD -->
-            <section class="panel">
-                <div class="panel-header">
-                    <h2>Live Rankings</h2>
-                    <div class="refresh-timer">
-                        <span id="updateTimer">20s</span>
-                    </div>
-                </div>
-
-                <div class="scroll-container-mask">
-                    <div class="scroll-content" id="mainLeaderboard"></div>
-                </div>
-
-                <div class="panel-footer">
-                    <span>Total Active: <strong id="totalCount">0</strong></span>
-                    <span id="lastSyncTime">Syncing...</span>
-                </div>
-            </section>
-
-            <!-- TOP PERFORMERS -->
-            <section class="panel top-panel">
-                <div class="panel-header">
-                    <h2>Top Performers</h2>
-                </div>
-
-                <div class="top-list" id="topPerformersList"></div>
-
-                <div class="quote-box">
-                    "Quality means doing it right when no one is looking."
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-    <audio id="notificationSound">
-        <source src="beep.mp3" type="audio/mpeg">
-    </audio>
-
-    <!-- JS -->
-    <script src="script.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
